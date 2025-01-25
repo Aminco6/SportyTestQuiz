@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration & Login</title>
+    <link rel="stylesheet" href="style.css">
+<style>
+   body {
+    font-family: Arial, sans-serif;
+    background-color: #f9f9f9;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    color: #333;
+}
+
+#app {
+    width: 100%;
+    max-width: 400px;
+    background: white;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    text-align: center;
+}
+
+h1 {
+    color: #007BFF;
+    margin-bottom: 20px;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+}
+
+form label {
+    text-align: left;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+form input {
+    margin-bottom: 15px;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+form button {
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+form button:hover {
+    background-color: #0056b3;
+}
+
+a {
+    color: #007BFF;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+</style> 
+    
+</head>
+<body>
+    <div id="app">
+        <!-- Registration Form -->
+        <div id="register-container">
+            <h1>Register</h1>
+            <form id="register-form">
+                <label for="email">Email:</label>
+                <input type="email" id="register-email" placeholder="soccerquiz@gmail.com" required>
+                <label for="username">Username:</label>
+                <input type="text" id="register-username" placeholder="example: soccerG.quiz3456" required>
+                <button type="submit">Register</button>
+            </form>
+            <p>Already have an account? <a href="#" id="go-to-login">Login</a></p>
+        </div>
+
+        <!-- Login Form -->
+        <div id="login-container" style="display: none;">
+            <h1>Login</h1>
+            <form id="login-form">
+                <label for="email">Email:</label>
+                <input type="email" id="login-email" required>
+                <button type="submit">Login</button>
+            </form>
+            <p>Don't have an account? <a href="#" id="go-to-register">Register</a></p>
+        </div>
+    </div>
+    <script src="script.js"></script>
+    
+    <script>
+    const API_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vThyd9sV8iklHI3q4nrvWk2cUFOAlXT0Zb1ecZdGQ2VDqU8rtHtJhi8rjK571tzxKy9_idvEwuw6ikA/pubhtml"; // Replace with your Google Apps Script URL
+
+// Switch between Register and Login views
+document.getElementById("go-to-login").addEventListener("click", () => {
+    document.getElementById("register-container").style.display = "none";
+    document.getElementById("login-container").style.display = "block";
+});
+
+document.getElementById("go-to-register").addEventListener("click", () => {
+    document.getElementById("login-container").style.display = "none";
+    document.getElementById("register-container").style.display = "block";
+});
+
+// Register a new user
+document.getElementById("register-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const email = document.getElementById("register-email").value;
+    const username = document.getElementById("register-username").value;
+
+    try {
+        const response = await fetch(API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                type: "register",
+                email,
+                username,
+            }),
+        });
+
+        const result = await response.text();
+        alert(result);
+
+        if (result === "Registration successful") {
+            document.getElementById("register-form").reset();
+            document.getElementById("go-to-login").click();
+        }
+    } catch (error) {
+        console.error("Registration Error:", error);
+        alert("An error occurred during registration.");
+    }
+});
+
+// Login a user
+document.getElementById("login-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const email = document.getElementById("login-email").value;
+
+    try {
+        const response = await fetch(API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                type: "login",
+                email,
+            }),
+        });
+
+        const result = await response.json();
+
+        if (result.email) {
+            alert(`Welcome back, ${result.username}!\nYour Wallet: ${result.walletCoins} coins\nReferral Link: ${result.referralURL}`);
+            console.log(result); // Use this result to manage user sessions in your app
+        } else {
+            alert("Login failed: " + result);
+        }
+    } catch (error) {
+        console.error("Login Error:", error);
+        alert("An error occurred during login.");
+    }
+});    
+        
+        
+    </script>
+</body>
+</html>
