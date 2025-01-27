@@ -41,16 +41,7 @@
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js';
         import { getFirestore, collection, addDoc } from 'https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js';
 
-       const firebaseConfig = {
-  apiKey: "AIzaSyB-6f4U9V6CWe65qOak3GFgk5dPLKuvUqs",
-  authDomain: "sportyquiz-458cb.firebaseapp.com",
-  projectId: "sportyquiz-458cb",
-  storageBucket: "sportyquiz-458cb.firebasestorage.app",
-  messagingSenderId: "1067499465438",
-  appId: "1:1067499465438:web:704b0af5e38a4e06e5b04f",
-  measurementId: "G-LHS2HK3EPL"
-};
-
+       
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth();
