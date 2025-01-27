@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quiz Website</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
 </head>
 <body>
     <div class="container">
@@ -32,9 +33,112 @@
             <button id="post-question-btn">Post Question</button>
         </div>
     </div>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js"></script>
-    <script src="app.js"></script>
+    <script type="module">
+        // Firebase configuration
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js';
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js';
+        import { getFirestore, collection, addDoc } from 'https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js';
+
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth();
+        const db = getFirestore(app);
+
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const registerBtn = document.getElementById('register-btn');
+        const loginBtn = document.getElementById('login-btn');
+        const logoutBtn = document.getElementById('logout-btn');
+        const welcomeMessage = document.getElementById('welcome-message');
+        const authSection = document.getElementById('auth-section');
+        const quizSection = document.getElementById('quiz-section');
+        const questionInput = document.getElementById('question');
+        const postQuestionBtn = document.getElementById('post-question-btn');
+
+        registerBtn.addEventListener('click', () => {
+            const email = emailInput.value;
+            const password = passwordInput.value;
+            createUserWithEmailAndPassword(auth, email, password)
+                .then(() => {
+                    alert('User registered successfully');
+                })
+                .catch(error => {
+                    console.error(error);
+                    alert(error.message);
+                });
+        });
+
+        loginBtn.addEventListener('click', () => {
+            const email = emailInput.value;
+            const password = passwordInput.value;
+            signInWithEmailAndPassword(auth, email, password)
+                .then(() => {
+                    alert('User logged in successfully');
+                })
+                .catch(error => {
+                    console.error(error);
+                    alert(error.message);
+                });
+        });
+
+        logoutBtn.addEventListener('click', () => {
+            signOut(auth)
+                .then(() => {
+                    alert('User logged out successfully');
+                })
+                .catch(error => {
+                    console.error(error);
+                    alert(error.message);
+                });
+        });
+
+        onAuthStateChanged(auth, user => {
+            if (user) {
+                welcomeMessage.innerText = `Welcome, ${user.email}`;
+                authSection.style.display = 'none';
+                quizSection.style.display = 'block';
+                logoutBtn.style.display = 'block';
+            } else {
+                welcomeMessage.innerText = '';
+                authSection.style.display = 'block';
+                quizSection.style.display = 'none';
+                logoutBtn.style.display = 'none';
+            }
+        });
+
+        postQuestionBtn.addEventListener('click', () => {
+            const question = questionInput.value;
+            const answer = document.querySelector('input[name="answer"]:checked').value;
+
+            if (question && answer) {
+                addDoc(collection(db, 'questions'), {
+                    question,
+                    answer,
+                    user: auth.currentUser.email,
+                    coins: 500
+                })
+                .then(() => {
+                    alert('Question posted successfully. You have earned 500 coins.');
+                    questionInput.value = '';
+                    document.querySelector('input[name="answer"]:checked').checked = false;
+                })
+                .catch(error => {
+                    console.error(error);
+                    alert(error.message);
+                });
+            } else {
+                alert('Please enter a question and select an answer.');
+            }
+        });
+    </script>
 </body>
 </html>
