@@ -1,0 +1,102 @@
+// Firebase configuration object
+const firebaseConfig = {
+  apiKey: "AIzaSyB-6f4U9V6CWe65qOak3GFgk5dPLKuvUqs",
+  authDomain: "sportyquiz-458cb.firebaseapp.com",
+  projectId: "sportyquiz-458cb",
+  storageBucket: "sportyquiz-458cb.firebasestorage.app",
+  messagingSenderId: "1067499465438",
+  appId: "1:1067499465438:web:704b0af5e38a4e06e5b04f",
+  measurementId: "G-LHS2HK3EPL"
+};
+
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+const emailInput = document.getElementById('email');
+const passwordInput = document.getElementById('password');
+const registerBtn = document.getElementById('register-btn');
+const loginBtn = document.getElementById('login-btn');
+const logoutBtn = document.getElementById('logout-btn');
+const welcomeMessage = document.getElementById('welcome-message');
+const authSection = document.getElementById('auth-section');
+const quizSection = document.getElementById('quiz-section');
+const questionInput = document.getElementById('question');
+const postQuestionBtn = document.getElementById('post-question-btn');
+
+registerBtn.addEventListener('click', () => {
+    const email = emailInput.value;
+    const password = passwordInput.value;
+    auth.createUserWithEmailAndPassword(email, password)
+        .then(() => {
+            alert('User registered successfully');
+        })
+        .catch(error => {
+            console.error(error);
+            alert(error.message);
+        });
+});
+
+loginBtn.addEventListener('click', () => {
+    const email = emailInput.value;
+    const password = passwordInput.value;
+    auth.signInWithEmailAndPassword(email, password)
+        .then(() => {
+            alert('User logged in successfully');
+        })
+        .catch(error => {
+            console.error(error);
+            alert(error.message);
+        });
+});
+
+logoutBtn.addEventListener('click', () => {
+    auth.signOut()
+        .then(() => {
+            alert('User logged out successfully');
+        })
+        .catch(error => {
+            console.error(error);
+            alert(error.message);
+        });
+});
+
+auth.onAuthStateChanged(user => {
+    if (user) {
+        welcomeMessage.innerText = `Welcome, ${user.email}`;
+        authSection.style.display = 'none';
+        quizSection.style.display = 'block';
+        logoutBtn.style.display = 'block';
+    } else {
+        welcomeMessage.innerText = '';
+        authSection.style.display = 'block';
+        quizSection.style.display = 'none';
+        logoutBtn.style.display = 'none';
+    }
+});
+
+postQuestionBtn.addEventListener('click', () => {
+    const question = questionInput.value;
+    const answer = document.querySelector('input[name="answer"]:checked').value;
+
+    if (question && answer) {
+        db.collection('questions').add({
+            question,
+            answer,
+            user: auth.currentUser.email,
+            coins: 500
+        })
+        .then(() => {
+            alert('Question posted successfully. You have earned 500 coins.');
+            questionInput.value = '';
+            document.querySelector('input[name="answer"]:checked').checked = false;
+        })
+        .catch(error => {
+            console.error(error);
+            alert(error.message);
+        });
+    } else {
+        alert('Please enter a question and select an answer.');
+    }
+});
