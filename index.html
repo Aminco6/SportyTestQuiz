@@ -37,9 +37,10 @@
         // Firebase configuration
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js';
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js';
-        import { getFirestore, collection, addDoc } from 'https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js';
+        import { getFirestore, collection, addDoc, doc, setDoc } from 'https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js';
 
-        apiKey: "AIzaSyB-6f4U9V6CWe65qOak3GFgk5dPLKuvUqs",
+       const firebaseConfig = {
+  apiKey: "AIzaSyB-6f4U9V6CWe65qOak3GFgk5dPLKuvUqs",
   authDomain: "sportyquiz-458cb.firebaseapp.com",
   projectId: "sportyquiz-458cb",
   storageBucket: "sportyquiz-458cb.firebasestorage.app",
@@ -68,7 +69,22 @@
             const email = emailInput.value;
             const password = passwordInput.value;
             createUserWithEmailAndPassword(auth, email, password)
-                .then(() => {
+                .then(async (userCredential) => {
+                    const user = userCredential.user;
+                    const userId = user.uid;
+                    const registrationDate = new Date().toISOString();
+                    const referralUrl = `https://your-website.com/referral/${userId}`;
+                    const profileImage = '';  // Set profile image URL if available
+
+                    // Add user data to Firestore
+                    await setDoc(doc(db, 'users', userId), {
+                        email: user.email,
+                        userWallet: { coins: 500 },
+                        referralUrl: referralUrl,
+                        profileImage: profileImage,
+                        dateRegistered: registrationDate
+                    });
+
                     alert('User registered successfully');
                 })
                 .catch(error => {
@@ -123,11 +139,10 @@
                 addDoc(collection(db, 'questions'), {
                     question,
                     answer,
-                    user: auth.currentUser.email,
-                    coins: 500
+                    user: auth.currentUser.email
                 })
                 .then(() => {
-                    alert('Question posted successfully. You have earned 500 coins.');
+                    alert('Question posted successfully.');
                     questionInput.value = '';
                     document.querySelector('input[name="answer"]:checked').checked = false;
                 })
