@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="/static/assets/plugins/fontawesome-free/css/all.min.css">
   <link rel="stylesheet" href="/static/assets/plugins/icheck-bootstrap/icheck-bootstrap.min.css">
   <link rel="stylesheet" href="/static/assets/dist/css/adminlte.min.css">
+  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.21.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.21.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.21.0/firebase-firestore.js"></script>
@@ -70,6 +71,7 @@
     </div>
   </div>
 </div>
+
 <script>
   // Your web app's Firebase configuration
   const firebaseConfig = {
@@ -81,8 +83,9 @@
   appId: "1:1067499465438:web:704b0af5e38a4e06e5b04f",
   measurementId: "G-LHS2HK3EPL"
 };
+
   // Initialize Firebase
-  const app = firebase.initializeApp(firebaseConfig);
+  firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
   const db = firebase.firestore();
 
