@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="/static/assets/dist/css/adminlte.min.css">
   <script src="https://www.gstatic.com/firebasejs/9.21.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.21.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.21.0/firebase-firestore.js"></script>
 </head>
 <body class="hold-transition register-page">
 <div class="register-box">
@@ -69,43 +70,66 @@
     </div>
   </div>
 </div>
-
 <script>
-  async function initializeFirebase() {
-    // Fetch Firebase configuration
-    const response = await fetch('./assets/config.json');
-    const data = await response.json();
-    const firebaseConfig = data.firebaseConfig;
+  // Your web app's Firebase configuration
+  const firebaseConfig = {
+  apiKey: "AIzaSyB-6f4U9V6CWe65qOak3GFgk5dPLKuvUqs",
+  authDomain: "sportyquiz-458cb.firebaseapp.com",
+  projectId: "sportyquiz-458cb",
+  storageBucket: "sportyquiz-458cb.firebasestorage.app",
+  messagingSenderId: "1067499465438",
+  appId: "1:1067499465438:web:704b0af5e38a4e06e5b04f",
+  measurementId: "G-LHS2HK3EPL"
+};
+  // Initialize Firebase
+  const app = firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
 
-    // Initialize Firebase
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
+  // Registration form submission
+  document.getElementById('registerForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const fullName = document.getElementById('fullName').value;
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+    const agreeTerms = document.getElementById('agreeTerms').checked;
 
-    // Handle form submission
-    const form = document.getElementById('registerForm');
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-      const confirmPassword = document.getElementById('confirmPassword').value;
+    if (password !== confirmPassword) {
+      alert('Passwords do not match!');
+      return;
+    }
 
-      if (password !== confirmPassword) {
-        alert('Passwords do not match!');
-        return;
-      }
+    if (!agreeTerms) {
+      alert('You must agree to the terms!');
+      return;
+    }
 
-      try {
-        const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-        await userCredential.user.sendEmailVerification();
-        alert('Registration successful! Check your email for verification.');
-        form.reset();
-      } catch (error) {
-        alert('Error: ' + error.message);
-      }
-    });
-  }
+    try {
+      const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+      const user = userCredential.user;
 
-  initializeFirebase();
+      // Send email verification
+      await user.sendEmailVerification();
+
+      // Add user to Firestore
+      await db.collection('users').doc(user.uid).set({
+        fullName: fullName,
+        email: email,
+        userWallets: { coins: 500 },
+        referralUrl: `https://your-website.com/referral/${user.uid}`,
+        profileImage: '',  // Add logic to upload and store profile image if needed
+        dateRegistered: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      alert('Registration successful! Please check your email for verification.');
+
+    } catch (error) {
+      console.error('Error registering user:', error);
+      alert('Error registering user: ' + error.message);
+    }
+  });
 </script>
 </body>
 </html>
